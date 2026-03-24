@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICI-Myocarditis International Registry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy:   #1a2744;
+    --blue:   #2a5298;
+    --accent: #c0392b;
+    --teal:   #1a6b6b;
+    --light:  #f7f8fa;
+    --border: #dde3ed;
+    --text:   #2c3344;
+    --muted:  #6b7590;
+    --white:  #ffffff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--white);
+    line-height: 1.65;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--navy);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 3rem; height: 58px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  .nav-brand {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 500; font-size: 1.15rem;
+    color: var(--white); letter-spacing: .04em;
+  }
+  .nav-brand span { color: #7ec8e3; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: rgba(255,255,255,.78);
+    text-decoration: none; font-size: .88rem; font-weight: 500;
+    letter-spacing: .03em; text-transform: uppercase;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: #fff; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #2a3f6f 60%, #1a4a6b 100%);
+    color: var(--white); padding: 6rem 3rem 5rem;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60'><circle cx='30' cy='30' r='1' fill='rgba(255,255,255,0.06)'/></svg>");
+    opacity: 1;
+  }
+  .hero-inner { position: relative; max-width: 820px; margin: 0 auto; }
+  .hero-eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .78rem; letter-spacing: .15em; text-transform: uppercase;
+    color: #7ec8e3; margin-bottom: 1.2rem;
+  }
+  .hero h1 {
+    font-family: "Source Serif 4", serif;
+    font-size: clamp(2rem, 4vw, 3rem); font-weight: 300;
+    line-height: 1.22; margin-bottom: 1.4rem;
+  }
+  .hero h1 strong { font-weight: 600; }
+  .hero-sub {
+    font-size: 1.05rem; color: rgba(255,255,255,.78);
+    max-width: 620px; margin: 0 auto 2.5rem;
+  }
+  .stats-row {
+    display: flex; justify-content: center; gap: 2.5rem;
+    flex-wrap: wrap; margin-top: 2.5rem;
+  }
+  .stat-box {
+    text-align: center;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 8px; padding: .9rem 1.8rem;
+    background: rgba(255,255,255,.06); backdrop-filter: blur(4px);
+  }
+  .stat-box .num {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 1.9rem; font-weight: 500; color: #7ec8e3; display: block;
+  }
+  .stat-box .lbl { font-size: .8rem; text-transform: uppercase;
+    letter-spacing: .08em; color: rgba(255,255,255,.6); }
+
+  /* ── SECTIONS ── */
+  section { padding: 5rem 3rem; }
+  section:nth-child(odd) { background: var(--white); }
+  section:nth-child(even) { background: var(--light); }
+  .section-inner { max-width: 1000px; margin: 0 auto; }
+  .section-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--blue); margin-bottom: .6rem;
+  }
+  h2 {
+    font-family: "Source Serif 4", serif;
+    font-size: 1.85rem; font-weight: 300; color: var(--navy);
+    margin-bottom: 1.8rem; padding-bottom: .8rem;
+    border-bottom: 2px solid var(--border);
+  }
+  h2 strong { font-weight: 600; }
+  p { margin-bottom: 1rem; color: var(--text); }
+
+  /* ── ABOUT ── */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+  .about-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.6rem 1.8rem;
+    border-top: 3px solid var(--blue);
+  }
+  .about-card h3 {
+    font-family: "Source Serif 4", serif;
+    font-size: 1.05rem; font-weight: 600;
+    color: var(--navy); margin-bottom: .75rem;
+  }
+  .about-card p { font-size: .92rem; margin-bottom: 0; color: var(--muted); }
+
+  /* ── PUBLICATIONS ── */
+  .pub-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.4rem 1.6rem; margin-bottom: 1rem;
+    transition: box-shadow .2s, transform .15s;
+  }
+  .pub-card:hover { box-shadow: 0 4px 18px rgba(42,82,152,.1); transform: translateY(-1px); }
+  .journal-badge {
+    display: inline-block; font-size: .72rem; font-weight: 600;
+    letter-spacing: .05em; text-transform: uppercase;
+    background: var(--navy); color: var(--white);
+    padding: .22rem .65rem; border-radius: 3px; margin-bottom: .7rem;
+  }
+  .pub-authors { font-size: .84rem; color: var(--muted); margin-bottom: .3rem; }
+  .pub-title { font-family: "Source Serif 4", serif; font-size: 1rem;
+    font-weight: 600; color: var(--navy); margin-bottom: .35rem; line-height: 1.4; }
+  .pub-journal { font-size: .84rem; color: var(--muted); margin-bottom: .5rem; }
+  .doi-link { font-family: "IBM Plex Mono", monospace; font-size: .78rem;
+    color: var(--blue); text-decoration: none; }
+  .doi-link:hover { text-decoration: underline; }
+
+  /* ── MAP & INSTITUTIONS ── */
+  #world-map-img { width: 100%; border-radius: 8px;
+    border: 1px solid var(--border); margin-bottom: 2rem; }
+  .map-note { font-size: .82rem; color: var(--muted); text-align: center;
+    margin-bottom: 2.5rem; font-style: italic; }
+  .country-group { border: 1px solid var(--border); border-radius: 6px;
+    margin-bottom: .5rem; overflow: hidden; }
+  .country-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.1rem; background: var(--white);
+    cursor: pointer; font-weight: 500; font-size: .92rem;
+    user-select: none; transition: background .15s;
+  }
+  .country-header:hover { background: #eef2f8; }
+  .count-badge {
+    background: var(--blue); color: #fff;
+    font-size: .72rem; font-family: "IBM Plex Mono", monospace;
+    padding: .15rem .5rem; border-radius: 12px; margin-left: auto; margin-right: .6rem;
+  }
+  .chevron { font-size: .75rem; color: var(--muted); transition: transform .2s; }
+  .country-header.open .chevron { transform: rotate(180deg); }
+  .inst-list { list-style: none; display: none; background: var(--light);
+    border-top: 1px solid var(--border); padding: .5rem 1rem .7rem 1.8rem; }
+  .inst-list.open { display: block; }
+  .inst-list li { font-size: .87rem; color: var(--muted); padding: .25rem 0;
+    border-bottom: 1px dashed #e0e5ef; }
+  .inst-list li:last-child { border-bottom: none; }
+
+  /* ── JOIN US ── */
+  .join-box {
+    background: var(--navy); color: var(--white);
+    border-radius: 12px; padding: 3rem; text-align: center;
+    max-width: 680px; margin: 0 auto;
+  }
+  .join-box h3 { font-family: "Source Serif 4", serif;
+    font-size: 1.6rem; font-weight: 300; margin-bottom: 1rem; }
+  .join-box p { color: rgba(255,255,255,.78); margin-bottom: 1.6rem; }
+  .join-email {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25);
+    color: #7ec8e3; text-decoration: none;
+    font-family: "IBM Plex Mono", monospace; font-size: .95rem;
+    padding: .75rem 1.6rem; border-radius: 6px;
+    transition: background .2s, border-color .2s;
+  }
+  .join-email:hover { background: rgba(255,255,255,.18); border-color: #7ec8e3; }
+  .join-criteria {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1rem; margin: 1.8rem 0; text-align: left;
+  }
+  .criterion {
+    background: rgba(255,255,255,.07); border-radius: 6px;
+    padding: .9rem 1.1rem; font-size: .88rem; color: rgba(255,255,255,.82);
+  }
+  .criterion strong { display: block; color: #7ec8e3;
+    font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: .3rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy); color: rgba(255,255,255,.45);
+    text-align: center; padding: 1.8rem; font-size: .8rem;
+  }
+
+  @media (max-width: 700px) {
+    nav { padding: 0 1rem; }
+    .nav-links { gap: 1rem; }
+    section { padding: 3.5rem 1.2rem; }
+    .about-grid { grid-template-columns: 1fr; }
+    .join-criteria { grid-template-columns: 1fr; }
+    .stats-row { gap: 1.2rem; }
+  }
+
+  /* ── RESEARCH PROJECTS ── */
+  .research-grid { display: grid; grid-template-columns: 1fr; gap: 1.2rem; }
+  .research-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.5rem 1.8rem;
+    border-left: 4px solid var(--teal);
+    transition: box-shadow .2s, transform .15s;
+  }
+  .research-card:hover { box-shadow: 0 4px 18px rgba(26,107,107,.1); transform: translateY(-1px); }
+  .research-num {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .72rem; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--teal); margin-bottom: .5rem;
+  }
+  .research-title {
+    font-family: "Source Serif 4", serif;
+    font-size: 1rem; font-weight: 600; color: var(--navy);
+    line-height: 1.4; margin-bottom: .6rem;
+  }
+  .research-acronym {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .8rem; color: var(--muted); margin-bottom: .5rem;
+  }
+  .research-obj {
+    font-size: .9rem; color: var(--muted); line-height: 1.65;
+  }
+  .research-obj strong { color: var(--navy); }
+
+  /* ── WORLD MAP ── */
+  .map-container { margin-bottom: 2rem; border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border); }
+  #leaflet-map { width: 100%; height: 420px; }
+  .map-static { width: 100%; border-radius: 10px; border: 1px solid var(--border);
+    margin-bottom: 2rem; display: block; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">ICI-<span>Myocarditis</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#publications">Publications</a></li>
+    <li><a href="#institutions">Institutions</a></li>
+    <li><a href="#research">Research</a></li>
+    <li><a href="#join">Join Us</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">International Registry</div>
+    <h1><strong>ICI-Myocarditis</strong><br>International Registry</h1>
+    <p class="hero-sub">
+      A multinational collaborative registry investigating immune checkpoint
+      inhibitor-associated myocarditis — its predictors, severity, and impact
+      on survival in cancer patients.
+    </p>
+    <div class="stats-row">
+      <div class="stat-box"><span class="num">~1,500</span><span class="lbl">Cases</span></div>
+      <div class="stat-box"><span class="num">165+</span><span class="lbl">Institutions</span></div>
+      <div class="stat-box"><span class="num">18</span><span class="lbl">Countries</span></div>
+      <div class="stat-box"><span class="num">7+</span><span class="lbl">Publications</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="section-label">Background</div>
+    <h2>About the <strong>Registry</strong></h2>
+    <p>
+      Immune checkpoint inhibitors (ICI) are monoclonal antibodies targeting surface receptors
+      on T-lymphocytes — including CTLA-4, PD-1, LAG-3 — or their ligands such as PD-L1,
+      designed to boost the immune response against cancer. They have become cornerstone
+      treatments across melanoma, lung, renal, head and neck, urothelial, hepatocellular,
+      and many other cancer types, with indications continuing to expand.
+    </p>
+    <p>
+      However, ICI-induced immune activation can lead to autoimmune-related adverse events
+      (irAEs) affecting any organ. Among these, <strong>cardiomyotoxicities</strong> —
+      encompassing inflammation of the heart and peripheral skeletal muscles — are uncommon
+      but the most fatal irAEs, with mortality rates up to 50%. These myotoxicities are
+      characterized by inflammatory infiltration with macrophages and cytotoxic
+      auto-reactive T-cells targeting muscular antigens such as α-myosin, with the heart
+      and peripheral muscles specifically and concomitantly affected.
+    </p>
+    <p>
+      Clinically, patients may experience life-threatening arrhythmias, cardiogenic shock,
+      or severe myositis with invalidating dysphagia or respiratory muscle failure mimicking
+      myasthenic syndrome — potentially requiring mechanical ventilation.
+    </p>
+    <div class="about-grid">
+      <div class="about-card">
+        <h3>Why a Registry?</h3>
+        <p>
+          An in-depth understanding of ICI myotoxicity incidence, predictors, and prognostic
+          impact is crucial for clinicians managing cancer patients. Because these events are
+          very rare, meaningful insights require large-scale multinational collaboration —
+          beyond what single-centre cohorts or clinical trials can provide.
+        </p>
+      </div>
+      <div class="about-card">
+        <h3>Registry Leadership</h3>
+        <p>
+          This ICI-myocarditis registry is led by <strong>Prof. Douglas B. Johnson</strong>
+          (Vanderbilt University Medical Center), with scientific direction from
+          <strong>Prof. Joe-Elie Salem</strong> (Sorbonne University /
+          Hôpital Pitié-Salpêtrière, Paris) and
+          <strong>Prof. Javid Moslehi</strong> (University of California San Francisco).
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PUBLICATIONS -->
+<section id="publications">
+  <div class="section-inner">
+    <div class="section-label">Research Output</div>
+    <h2>Selected <strong>Publications</strong></h2>
+    
+          <div class="pub-card">
+            <span class="journal-badge">Nature Medicine</span>
+            <p class="pub-authors">Fenioux C, Abbar B, Boussouar S, et al. (2023)</p>
+            <p class="pub-title">Thymus alterations and susceptibility to immune checkpoint inhibitor myocarditis.</p>
+            <p class="pub-journal"><em>Nature Medicine.</em> 29(12):3100-3110</p>
+            <a href="https://doi.org/10.1038/s41591-023-02591-2" target="_blank" class="doi-link">doi: 10.1038/s41591-023-02591-2 ↗</a>
+          </div>
+
+          <div class="pub-card">
+            <span class="journal-badge">Circulation</span>
+            <p class="pub-authors">Lehmann LH, Heckmann MB, Bailly G, et al. (2023)</p>
+            <p class="pub-title">Cardiomuscular Biomarkers in the Diagnosis and Prognostication of Immune Checkpoint Inhibitor Myocarditis.</p>
+            <p class="pub-journal"><em>Circulation.</em> 148(6):473-486</p>
+            <a href="https://doi.org/10.1161/CIRCULATIONAHA.123.062405" target="_blank" class="doi-link">doi: 10.1161/CIRCULATIONAHA.123.062405 ↗</a>
+          </div>
+
+          <div class="pub-card">
+            <span class="journal-badge">Eur Heart Journal</span>
+            <p class="pub-authors">Power JR, Dolladille C, Ozbay B, et al. (2026)</p>
+            <p class="pub-title">Immune checkpoint inhibitor-associated myocarditis: a novel risk score.</p>
+            <p class="pub-journal"><em>European Heart Journal.</em> 47(9):1050-1062</p>
+            <a href="https://doi.org/10.1093/eurheartj/ehaf315" target="_blank" class="doi-link">doi: 10.1093/eurheartj/ehaf315 ↗</a>
+          </div>
+
+          <div class="pub-card">
+            <span class="journal-badge">JACC CardioOncol</span>
+            <p class="pub-authors">Chen YC, Dolladille C, Rao A, et al. (2025)</p>
+            <p class="pub-title">Immune Checkpoint Inhibitor Myocarditis and Left Ventricular Systolic Dysfunction.</p>
+            <p class="pub-journal"><em>JACC CardioOncology.</em> 7(3):234-248</p>
+            <a href="https://doi.org/10.1016/j.jaccao.2025.01.020" target="_blank" class="doi-link">doi: 10.1016/j.jaccao.2025.01.020 ↗</a>
+          </div>
+
+          <div class="pub-card">
+            <span class="journal-badge">Circulation</span>
+            <p class="pub-authors">Power JR, Alexandre J, Choudhary A, et al. (2021)</p>
+            <p class="pub-title">Electrocardiographic Manifestations of Immune Checkpoint Inhibitor Myocarditis.</p>
+            <p class="pub-journal"><em>Circulation.</em> 144(18):1521-1523</p>
+            <a href="https://doi.org/10.1161/CIRCULATIONAHA.121.055816" target="_blank" class="doi-link">doi: 10.1161/CIRCULATIONAHA.121.055816 ↗</a>
+          </div>
+
+          <div class="pub-card">
+            <span class="journal-badge">Eur J Cancer</span>
+            <p class="pub-authors">Nowatzke J, Guedeney P, Palaskas N, et al. (2022)</p>
+            <p class="pub-title">Coronary artery disease and revascularization associated with immune checkpoint blocker myocarditis: Report from an international registry.</p>
+            <p class="pub-journal"><em>European Journal of Cancer.</em> 177:197-205</p>
+            <a href="https://doi.org/10.1016/j.ejca.2022.07.018" target="_blank" class="doi-link">doi: 10.1016/j.ejca.2022.07.018 ↗</a>
+          </div>
+
+          <div class="pub-card">
+            <span class="journal-badge">Arch Cardiovasc Dis</span>
+            <p class="pub-authors">Power JR, Alexandre J, Choudhary A, et al. (2022)</p>
+            <p class="pub-title">Association of early electrical changes with cardiovascular outcomes in immune checkpoint inhibitor myocarditis.</p>
+            <p class="pub-journal"><em>Archives of Cardiovascular Diseases.</em> 115(5):315-330</p>
+            <a href="https://doi.org/10.1016/j.acvd.2022.03.003" target="_blank" class="doi-link">doi: 10.1016/j.acvd.2022.03.003 ↗</a>
+          </div>
+  </div>
+</section>
+
+<!-- INSTITUTIONS -->
+<section id="institutions">
+  <div class="section-inner">
+    <div class="section-label">Global Network</div>
+    <h2>Contributing <strong>Institutions</strong></h2>
+    <p class="map-note">
+      165 contributing institutions across 18 countries.
+      Click a country to expand the list of participating centers.
+    </p>
+    
+<div class="map-container">
+<div id="leaflet-map"></div>
+</div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var map = L.map("leaflet-map", {scrollWheelZoom: false}).setView([30, 10], 2);
+L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+  attribution: "© OpenStreetMap © CARTO", maxZoom: 10
+}).addTo(map);
+  L.circleMarker([-25.3, 133.8], {radius:14, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Australia</strong><br>4 institutions<br><br>• Peter MacCallum Cancer Centre<br>• Westmead Hospital<br>• Alfred Health, Monash University<br>• Royal North Shore Hospital');
+  L.circleMarker([47.5, 14.6], {radius:10, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Austria</strong><br>1 institution<br><br>• Medical University of Graz');
+  L.circleMarker([50.5, 4.5], {radius:12.9, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Belgium</strong><br>3 institutions<br><br>• Centre Hospitalier de Mouscron<br>• Cliniques universitaires Saint-Luc<br>• Hopital Universitaire de Bruxelles');
+  L.circleMarker([56.1, -106.3], {radius:14.9, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Canada</strong><br>5 institutions<br><br>• Mc Master University<br>• Toronto General Hospital<br>• Montreal Heart Institute<br>• Sunnybrook<br>• University of Toronto');
+  L.circleMarker([35.9, 104.2], {radius:18.6, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>China</strong><br>10 institutions<br><br>• The Second Hospital of Tianjin Medical University<br>• Shanghai Jiao Tong University<br>• The University of Hong Kong<br>• The First Affiliated Hospital of Harbin Medical University<br>• Tongji Medical College of Huazhong University of Science and Technology<br>• Qianfoshan Hospital<br>• Guangdong Academy of Medical Sciences<br>• The First Affiliated Hospital of Weifang Medical University<br>• General Hospital of Chinese People&#39;s Liberation Army<br>• The Second Xiangya Hospital of Central South University');
+  L.circleMarker([46.2, 2.2], {radius:27.9, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>France</strong><br>30 institutions<br><br>• APHP Hopital Pitie Salpetriere<br>• Aix Marseille University<br>• Hospices Civils de Lyon<br>• CHU Montpellier<br>• APHP Hopital Lariboisiere<br>• CHU Lille<br>• CHU Caen<br>• APHP Hopital Saint Antoine<br>• CHU Rangueil Toulouse<br>• APHP Hopital Bichat<br>• Bordeaux University Hospital<br>• CHRU Tours Hopital Trousseau<br>• APHP Hopital Georges Pompidou<br>• APHP Hopital Henri Mondor<br>• CHU Nantes<br>• Hospital Foch<br>• CH de Valenciennes<br>• CHU Clermont Ferrand<br>• CHU Nice<br>• CHU Rennes<br>• CHU de Rouen<br>• CH Annecy Genevois<br>• CH Morlaix<br>• CHU St-Etienne<br>• CHU de Poitiers<br>• Centre Hospitalier Avignon<br>• Centre Hospitalier Saint joseph saint luc<br>• ICO Nantes<br>• Institut Bergonie Centre de Lutte contre le Cancer<br>• Centre Hospitalier Memorial France Etats-Unis de Saint-Lo');
+  L.circleMarker([51.2, 10.5], {radius:15.8, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Germany</strong><br>6 institutions<br><br>• Heidelberg University Hospital<br>• University Hospital LMU<br>• University Hospital Erlangen<br>• Charite Campus Mitte (CMM)<br>• ELK Thorax Center<br>• University Hospital Mainz');
+  L.circleMarker([31.5, 34.8], {radius:14.9, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Israel</strong><br>5 institutions<br><br>• Tel Aviv Sourasky Medical Center<br>• Hadassah University Medical Center<br>• Rabin Medical Center<br>• Rambam Health Care Campus<br>• Sheba Medical Center');
+  L.circleMarker([41.9, 12.6], {radius:16.6, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Italy</strong><br>7 institutions<br><br>• Cardiology - Versilia Hospital, Azienda USL Toscana Nord Ovest<br>• San Raffaele Hospital<br>• Ospedale Guglielmo da Saliceto di Piacenza<br>• IRCCS Policlinico San Martino<br>• Niguarda Hospital<br>• Istituto Nazionale Tumori IRCCS Fondazione G. Pascale<br>• San Giacomo Hospital');
+  L.circleMarker([36.2, 138.3], {radius:22, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Japan</strong><br>16 institutions<br><br>• IUHW Mita Hospital<br>• National Cancer Center Hospital East<br>• University of Tsukuba<br>• Anjo Kosei Hospital<br>• Japan Community Health Organization Kyushu Hospital<br>• Keio University<br>• Kumamoto University<br>• Mitsui Memorial Hospital<br>• Nagoya University Graduate School of Medicine<br>• Saiseikai Narashino Hospital<br>• Sendai Kousei Hospital<br>• Shinshu University<br>• St. Luke&#39;s International Hospital<br>• Teikyo University School of Medicine<br>• Tokyo Saiseikai Central Hospital<br>• Tokyo Women&#39;s Medical University');
+  L.circleMarker([33.9, 35.5], {radius:10, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Lebanon</strong><br>1 institution<br><br>• APHP Hotel Dieu');
+  L.circleMarker([21.5, 55.9], {radius:10, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Oman</strong><br>1 institution<br><br>• Sultan Qaboos Comprehensive Cancer Care and Research Center');
+  L.circleMarker([30.4, 69.3], {radius:10, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Pakistan</strong><br>1 institution<br><br>• Allama Iqbal Medical College');
+  L.circleMarker([40.5, -3.7], {radius:14.9, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Spain</strong><br>5 institutions<br><br>• Hospital Universitari Vall d&#39;Hebron<br>• Bellvitge University Hospital<br>• Hospital Universitario Central de Asturias (HUCA)<br>• Hospital Universitario La Paz<br>• Clinica Universidad de Navarra');
+  L.circleMarker([46.8, 8.2], {radius:14, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Switzerland</strong><br>4 institutions<br><br>• Centre Hospitalier Universitaire Vaudois<br>• University Hospital Basel<br>• Bern University Hospital<br>• Geneva University Hospitals and Medical Faculty');
+  L.circleMarker([23.7, 121], {radius:11.7, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>Taiwan</strong><br>2 institutions<br><br>• Chi Mei Medical Center<br>• Taipei Medical University Hospital');
+  L.circleMarker([55.4, -3.4], {radius:12.9, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>United Kingdom</strong><br>3 institutions<br><br>• The Christie<br>• Barts Health NHS Trust University College London Hospital<br>• Mount Vernon Cancer Centre');
+  L.circleMarker([37.1, -95.7], {radius:37.2, fillColor:'#2a5298', color:'#1a2744', weight:1, fillOpacity:0.75}).addTo(map).bindPopup('<strong>United States</strong><br>61 institutions<br><br>• MD Anderson Cancer Center<br>• University of Washington<br>• University of Michigan<br>• Stanford University<br>• Beth Israel Deaconess Medical Center<br>• University of Iowa<br>• Vanderbilt University Medical Center<br>• University of Texas Southwestern Medical Center<br>• University of Pittsburgh Medical Center<br>• Washington University in St. Louis<br>• University of California San Diego Health<br>• University of California San Francisco<br>• University of Virginia<br>• Cedars Sinai The Angeles Clinic and Research Institute<br>• Yale University<br>• Maine Medical Center<br>• Providence St. Joseph Health<br>• Dartmouth Hitchcock Medical Center<br>• University of Texas at Austin Ascension Seton<br>• Johns Hopkins University<br>• University of Colorado<br>• UNC Eshelman School of Pharmacy<br>• Emory University<br>• Northwestern University<br>• University of Wisconsin Hospitals<br>• Northwell Health<br>• Georgetown Hospital<br>• Medstar Heart and Vascular Institute<br>• NYU Langone Health<br>• Rosewell Park Cancer Center<br>• University of Utah<br>• Center for Cancer Research National Cancer Institute National Institutes of Health<br>• Cleveland Clinic Foundation<br>• Mayo Clinic<br>• Medical College of Georgia at Augusta University<br>• Ohio State University Wexner Medical Center<br>• University of Alabama at Birmingham<br>• University of California at Davis<br>• University of Maryland Medical Center<br>• Vidant Medical Center/East Carolina University<br>• Weill Cornell Medicine<br>• Baylor College of Medicine<br>• Brigham & Women&#39;s Hospital<br>• Eisenhower Medical Center<br>• Hartford Hospital<br>• Heart Care Centers of Illinois<br>• Houston Methodist Hospital<br>• Lahey Hospital and Medical Center<br>• Marshall University<br>• New York Institute of Technology College of Osteopathic Medicine<br>• University of Chicago<br>• University of Florida<br>• University of Southern California<br>• VCU Medical center<br>• Veterans Affairs Puget Sound Health Care System-Seattle<br>• Cooper University Hospital<br>• Dana Farber Cancer Institute<br>• Markey Cancer Center, University of Kentucky<br>• New York-Presbyterian Brooklyn Methodist Hospital<br>• University of Massachusetts, Berkshire Medical Centre<br>• University of North Carolina Medical Center Chapel Hill');
+</script>
+    
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇦🇺 Australia</span>
+          <span class="count-badge">4</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Peter MacCallum Cancer Centre</li>
+          <li>Westmead Hospital</li>
+          <li>Alfred Health, Monash University</li>
+          <li>Royal North Shore Hospital</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇦🇹 Austria</span>
+          <span class="count-badge">1</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Medical University of Graz</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇧🇪 Belgium</span>
+          <span class="count-badge">3</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Centre Hospitalier de Mouscron</li>
+          <li>Cliniques universitaires Saint-Luc</li>
+          <li>Hopital Universitaire de Bruxelles</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇨🇦 Canada</span>
+          <span class="count-badge">5</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Mc Master University</li>
+          <li>Toronto General Hospital</li>
+          <li>Montreal Heart Institute</li>
+          <li>Sunnybrook</li>
+          <li>University of Toronto</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇨🇳 China</span>
+          <span class="count-badge">10</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>The Second Hospital of Tianjin Medical University</li>
+          <li>Shanghai Jiao Tong University</li>
+          <li>The University of Hong Kong</li>
+          <li>The First Affiliated Hospital of Harbin Medical University</li>
+          <li>Tongji Medical College of Huazhong University of Science and Technology</li>
+          <li>Qianfoshan Hospital</li>
+          <li>Guangdong Academy of Medical Sciences</li>
+          <li>The First Affiliated Hospital of Weifang Medical University</li>
+          <li>General Hospital of Chinese People's Liberation Army</li>
+          <li>The Second Xiangya Hospital of Central South University</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇫🇷 France</span>
+          <span class="count-badge">30</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>APHP Hopital Pitie Salpetriere</li>
+          <li>Aix Marseille University</li>
+          <li>Hospices Civils de Lyon</li>
+          <li>CHU Montpellier</li>
+          <li>APHP Hopital Lariboisiere</li>
+          <li>CHU Lille</li>
+          <li>CHU Caen</li>
+          <li>APHP Hopital Saint Antoine</li>
+          <li>CHU Rangueil Toulouse</li>
+          <li>APHP Hopital Bichat</li>
+          <li>Bordeaux University Hospital</li>
+          <li>CHRU Tours Hopital Trousseau</li>
+          <li>APHP Hopital Georges Pompidou</li>
+          <li>APHP Hopital Henri Mondor</li>
+          <li>CHU Nantes</li>
+          <li>Hospital Foch</li>
+          <li>CH de Valenciennes</li>
+          <li>CHU Clermont Ferrand</li>
+          <li>CHU Nice</li>
+          <li>CHU Rennes</li>
+          <li>CHU de Rouen</li>
+          <li>CH Annecy Genevois</li>
+          <li>CH Morlaix</li>
+          <li>CHU St-Etienne</li>
+          <li>CHU de Poitiers</li>
+          <li>Centre Hospitalier Avignon</li>
+          <li>Centre Hospitalier Saint joseph saint luc</li>
+          <li>ICO Nantes</li>
+          <li>Institut Bergonie Centre de Lutte contre le Cancer</li>
+          <li>Centre Hospitalier Memorial France Etats-Unis de Saint-Lo</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇩🇪 Germany</span>
+          <span class="count-badge">6</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Heidelberg University Hospital</li>
+          <li>University Hospital LMU</li>
+          <li>University Hospital Erlangen</li>
+          <li>Charite Campus Mitte (CMM)</li>
+          <li>ELK Thorax Center</li>
+          <li>University Hospital Mainz</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇮🇱 Israel</span>
+          <span class="count-badge">5</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Tel Aviv Sourasky Medical Center</li>
+          <li>Hadassah University Medical Center</li>
+          <li>Rabin Medical Center</li>
+          <li>Rambam Health Care Campus</li>
+          <li>Sheba Medical Center</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇮🇹 Italy</span>
+          <span class="count-badge">7</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Cardiology - Versilia Hospital, Azienda USL Toscana Nord Ovest</li>
+          <li>San Raffaele Hospital</li>
+          <li>Ospedale Guglielmo da Saliceto di Piacenza</li>
+          <li>IRCCS Policlinico San Martino</li>
+          <li>Niguarda Hospital</li>
+          <li>Istituto Nazionale Tumori IRCCS Fondazione G. Pascale</li>
+          <li>San Giacomo Hospital</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇯🇵 Japan</span>
+          <span class="count-badge">16</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>IUHW Mita Hospital</li>
+          <li>National Cancer Center Hospital East</li>
+          <li>University of Tsukuba</li>
+          <li>Anjo Kosei Hospital</li>
+          <li>Japan Community Health Organization Kyushu Hospital</li>
+          <li>Keio University</li>
+          <li>Kumamoto University</li>
+          <li>Mitsui Memorial Hospital</li>
+          <li>Nagoya University Graduate School of Medicine</li>
+          <li>Saiseikai Narashino Hospital</li>
+          <li>Sendai Kousei Hospital</li>
+          <li>Shinshu University</li>
+          <li>St. Luke's International Hospital</li>
+          <li>Teikyo University School of Medicine</li>
+          <li>Tokyo Saiseikai Central Hospital</li>
+          <li>Tokyo Women's Medical University</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇱🇧 Lebanon</span>
+          <span class="count-badge">1</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>APHP Hotel Dieu</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇴🇲 Oman</span>
+          <span class="count-badge">1</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Sultan Qaboos Comprehensive Cancer Care and Research Center</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇵🇰 Pakistan</span>
+          <span class="count-badge">1</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Allama Iqbal Medical College</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇪🇸 Spain</span>
+          <span class="count-badge">5</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Hospital Universitari Vall d'Hebron</li>
+          <li>Bellvitge University Hospital</li>
+          <li>Hospital Universitario Central de Asturias (HUCA)</li>
+          <li>Hospital Universitario La Paz</li>
+          <li>Clinica Universidad de Navarra</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇨🇭 Switzerland</span>
+          <span class="count-badge">4</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Centre Hospitalier Universitaire Vaudois</li>
+          <li>University Hospital Basel</li>
+          <li>Bern University Hospital</li>
+          <li>Geneva University Hospitals and Medical Faculty</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇹🇼 Taiwan</span>
+          <span class="count-badge">2</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>Chi Mei Medical Center</li>
+          <li>Taipei Medical University Hospital</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇬🇧 United Kingdom</span>
+          <span class="count-badge">3</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>The Christie</li>
+          <li>Barts Health NHS Trust University College London Hospital</li>
+          <li>Mount Vernon Cancer Centre</li>
+        </ul>
+      </div>
+      <div class="country-group">
+        <div class="country-header" onclick="toggleCountry(this)">
+          <span>🇺🇸 United States</span>
+          <span class="count-badge">61</span>
+          <span class="chevron">▼</span>
+        </div>
+        <ul class="inst-list">
+          <li>MD Anderson Cancer Center</li>
+          <li>University of Washington</li>
+          <li>University of Michigan</li>
+          <li>Stanford University</li>
+          <li>Beth Israel Deaconess Medical Center</li>
+          <li>University of Iowa</li>
+          <li>Vanderbilt University Medical Center</li>
+          <li>University of Texas Southwestern Medical Center</li>
+          <li>University of Pittsburgh Medical Center</li>
+          <li>Washington University in St. Louis</li>
+          <li>University of California San Diego Health</li>
+          <li>University of California San Francisco</li>
+          <li>University of Virginia</li>
+          <li>Cedars Sinai The Angeles Clinic and Research Institute</li>
+          <li>Yale University</li>
+          <li>Maine Medical Center</li>
+          <li>Providence St. Joseph Health</li>
+          <li>Dartmouth Hitchcock Medical Center</li>
+          <li>University of Texas at Austin Ascension Seton</li>
+          <li>Johns Hopkins University</li>
+          <li>University of Colorado</li>
+          <li>UNC Eshelman School of Pharmacy</li>
+          <li>Emory University</li>
+          <li>Northwestern University</li>
+          <li>University of Wisconsin Hospitals</li>
+          <li>Northwell Health</li>
+          <li>Georgetown Hospital</li>
+          <li>Medstar Heart and Vascular Institute</li>
+          <li>NYU Langone Health</li>
+          <li>Rosewell Park Cancer Center</li>
+          <li>University of Utah</li>
+          <li>Center for Cancer Research National Cancer Institute National Institutes of Health</li>
+          <li>Cleveland Clinic Foundation</li>
+          <li>Mayo Clinic</li>
+          <li>Medical College of Georgia at Augusta University</li>
+          <li>Ohio State University Wexner Medical Center</li>
+          <li>University of Alabama at Birmingham</li>
+          <li>University of California at Davis</li>
+          <li>University of Maryland Medical Center</li>
+          <li>Vidant Medical Center/East Carolina University</li>
+          <li>Weill Cornell Medicine</li>
+          <li>Baylor College of Medicine</li>
+          <li>Brigham & Women's Hospital</li>
+          <li>Eisenhower Medical Center</li>
+          <li>Hartford Hospital</li>
+          <li>Heart Care Centers of Illinois</li>
+          <li>Houston Methodist Hospital</li>
+          <li>Lahey Hospital and Medical Center</li>
+          <li>Marshall University</li>
+          <li>New York Institute of Technology College of Osteopathic Medicine</li>
+          <li>University of Chicago</li>
+          <li>University of Florida</li>
+          <li>University of Southern California</li>
+          <li>VCU Medical center</li>
+          <li>Veterans Affairs Puget Sound Health Care System-Seattle</li>
+          <li>Cooper University Hospital</li>
+          <li>Dana Farber Cancer Institute</li>
+          <li>Markey Cancer Center, University of Kentucky</li>
+          <li>New York-Presbyterian Brooklyn Methodist Hospital</li>
+          <li>University of Massachusetts, Berkshire Medical Centre</li>
+          <li>University of North Carolina Medical Center Chapel Hill</li>
+        </ul>
+      </div>
+  </div>
+</section>
+
+
+<!-- RESEARCH PROJECTS -->
+<section id="research">
+  <div class="section-inner">
+    <div class="section-label">Ongoing Work</div>
+    <h2>Research <strong>Projects</strong></h2>
+    <div class="research-grid">
+
+      <div class="research-card">
+        <div class="research-num">Project 01 &nbsp;·&nbsp; Survival Analysis</div>
+        <div class="research-title">
+          Assessing Lethality and Risk Factors in Immune Checkpoint Inhibitor-Induced
+          Myocarditis: a Survival Analysis Based on International Registry
+        </div>
+        <div class="research-acronym">ICI-myocarditis</div>
+        <div class="research-obj">
+          <strong>Objective:</strong> Investigate the severity of myocarditis and pharmacological
+          treatments received — including steroids and second-line immunosuppressants — as a
+          function of overall survival in patients with ICI-associated myocarditis.
+        </div>
+      </div>
+
+      <div class="research-card">
+        <div class="research-num">Project 02 &nbsp;·&nbsp; Electrocardiography</div>
+        <div class="research-title">
+          Prognostic Value of Longitudinal ECG Changes in ICI-Associated Myocarditis
+        </div>
+        <div class="research-obj">
+          <strong>Objective:</strong> Investigate whether serial electrocardiographic changes
+          over the course of ICI-myocarditis carry independent prognostic value for
+          cardiovascular outcomes and overall survival.
+        </div>
+      </div>
+
+      <div class="research-card">
+        <div class="research-num">Project 03 &nbsp;·&nbsp; ICI Re-challenge</div>
+        <div class="research-title">
+          Influence of ICI Re-challenge on Outcomes in Patients with Prior ICI-Myocarditis
+        </div>
+        <div class="research-obj">
+          <strong>Objective:</strong> Investigate the safety and oncological impact of
+          re-introducing immune checkpoint inhibitor therapy in patients who previously
+          experienced ICI-associated myocarditis, and identify factors associated with
+          recurrence and survival outcomes.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- JOIN US -->
+<section id="join">
+  <div class="section-inner">
+    <div class="section-label">Collaborate</div>
+    <h2>Join <strong>the Registry</strong></h2>
+    <div class="join-box">
+      <h3>Become a Contributing Center</h3>
+      <p>
+        We welcome institutions worldwide. Participation involves secure online data entry
+        via REDCap (hosted at Vanderbilt University Medical Center).
+        Each site retains access only to its own submitted cases via unique, password-protected access codes.
+      </p>
+
+      <div style="margin:1.4rem 0;text-align:left">
+        <div style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:#7ec8e3;font-weight:600;margin-bottom:.7rem">Authorship Criteria</div>
+        <table style="width:100%;border-collapse:collapse;font-size:.88rem">
+          <tr style="border-bottom:1px solid rgba(255,255,255,.15)">
+            <td style="padding:.5rem .8rem;color:rgba(255,255,255,.6);width:35%">1 case</td>
+            <td style="padding:.5rem .8rem;color:rgba(255,255,255,.88)">Contributing center acknowledgment</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.15)">
+            <td style="padding:.5rem .8rem;color:rgba(255,255,255,.6)">&ge;5 cases</td>
+            <td style="padding:.5rem .8rem;color:rgba(255,255,255,.88)">One co-author on registry publications</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.15)">
+            <td style="padding:.5rem .8rem;color:rgba(255,255,255,.6)">&ge;15 cases</td>
+            <td style="padding:.5rem .8rem;color:rgba(255,255,255,.88)">Two co-authors on registry publications</td>
+          </tr>
+          <tr>
+            <td style="padding:.5rem .8rem;color:rgba(255,255,255,.6)">&ge;20 cases</td>
+            <td style="padding:.5rem .8rem;color:rgba(255,255,255,.88)">Potential access to full dataset (subject to Steering Committee approval)</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="join-criteria">
+        <div class="criterion">
+          <strong>Data Entry</strong>
+          Secure REDCap platform; each site accesses only its own cases
+        </div>
+        <div class="criterion">
+          <strong>Privacy</strong>
+          Fully de-identified data; no patient names or record numbers collected
+        </div>
+        <div class="criterion">
+          <strong>Ethics</strong>
+          IRB #222075; NCT04294771. Local ethics approval required before submission
+        </div>
+        <div class="criterion">
+          <strong>Data Rights</strong>
+          Data not shared with third parties without explicit written approval from contributing sites
+        </div>
+      </div>
+      <a href="mailto:shuangxia2024@gmail.com" class="join-email">
+        ✉ &nbsp; Contact us to join
+      </a>
+    </div>
+
+    <!-- Data Management & Ethics accordion -->
+    <div style="max-width:680px;margin:2rem auto 0">
+      <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <button onclick="toggleDM(this)"
+          style="width:100%;text-align:left;padding:1rem 1.2rem;background:var(--light);border:none;cursor:pointer;font-size:.92rem;font-weight:600;color:var(--navy);display:flex;justify-content:space-between;align-items:center">
+          Data Management &amp; Ethical Compliance
+          <span class="chv" style="font-size:.75rem;color:var(--muted)">&#9660;</span>
+        </button>
+        <div style="display:none;padding:1.4rem 1.6rem;font-size:.88rem;color:var(--muted);line-height:1.7">
+          <p style="margin-bottom:.8rem"><strong style="color:var(--navy)">Storage &amp; Access.</strong>
+            All data are stored on HIPAA-compliant, encrypted REDCap servers hosted at Vanderbilt University
+            Medical Center. Only the Principal Investigator and scientific directors have access to the
+            complete dataset. All data access activities are logged and monitored.
+          </p>
+          <p style="margin-bottom:.8rem"><strong style="color:var(--navy)">Security.</strong>
+            Data transmission uses SSL/TLS encryption. No identifiable patient information is collected.
+            Multi-factor authentication is required for dataset access. Regular security audits are conducted.
+          </p>
+          <p style="margin-bottom:.8rem"><strong style="color:var(--navy)">Patient Privacy.</strong>
+            All data are fully de-identified before registry entry. Dates are transformed to relative
+            time intervals (e.g., days from ICI initiation to myocarditis onset).
+          </p>
+          <p style="margin-bottom:0"><strong style="color:var(--navy)">Data Sharing.</strong>
+            Data will not be shared with any third party outside the research team without explicit written
+            approval from contributing sites. No commercial use of data is permitted without separate agreements.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  ICI-Myocarditis International Registry &nbsp;·&nbsp;
+  Coordinated by Prof. Joe-Elie Salem &amp; Prof. Javid Moslehi
+</footer>
+
+<script>
+function toggleCountry(el) {
+  el.classList.toggle("open");
+  const list = el.nextElementSibling;
+  list.classList.toggle("open");
+}
+function toggleDM(btn) {
+  const panel = btn.nextElementSibling;
+  const chv   = btn.querySelector(".chv");
+  if (panel.style.display === "block") {
+    panel.style.display = "none";
+    chv.innerHTML = "&#9660;";
+  } else {
+    panel.style.display = "block";
+    chv.innerHTML = "&#9650;";
+  }
+}
+</script>
+</body>
+</html>
